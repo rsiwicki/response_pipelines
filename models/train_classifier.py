@@ -15,6 +15,7 @@ from sklearn.metrics import confusion_matrix
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
 
 nltk.download('punkt')
 nltk.download('stopwords')

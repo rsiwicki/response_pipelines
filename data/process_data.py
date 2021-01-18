@@ -30,7 +30,7 @@ def load_data(messages_filepath, categories_filepath):
         categories[column] = categories[column].apply(lambda c : c.split('-')[1])
 
         # convert column from string to numeric
-        categories[column] = categories[column].astype('str')
+        categories[column] = categories[column].astype('int')
     
     # drop the original categories column from `df`
     df = df.drop('categories', axis=1)
