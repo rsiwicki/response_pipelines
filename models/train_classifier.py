@@ -1,12 +1,23 @@
 import sys
 
+from nltk.tokenize import word_tokenise
+from nltk.stem.wordnet import WordNetLemmatizer
+
+stop_words = stopwords.words("english")
+lemmatizer = WordNetLemmatizer()
 
 def load_data(database_filepath):
+    
     pass
 
 
 def tokenize(text):
-    pass
+    # is to normalise case and remove punctuation
+    text = re.sub(r"[^a-zA-Z0-9]"," ",text.lower())
+    # tokenise the text
+    tokens = word_tokenize(text)
+    #lemmatize take out the stop words
+    return [lemmatizer.lemmatize(word) for word in tokens if word not in stop_words]
 
 
 def build_model():
