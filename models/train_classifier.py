@@ -7,8 +7,8 @@ stop_words = stopwords.words("english")
 lemmatizer = WordNetLemmatizer()
 
 def load_data(database_filepath):
-    engine = create_engine("sqlite:///%s" % "Test1.db", execution_options={"sqlite_raw_colnames": True})
-    df = pd.read_sql_table("Test1", engine)
+    engine = create_engine("sqlite:///%s" % database_filepath, execution_options={"sqlite_raw_colnames": True})
+    df = pd.read_sql_table("messages", engine)
     return df
 
 
