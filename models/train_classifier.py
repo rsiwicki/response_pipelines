@@ -10,12 +10,14 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from sqlalchemy import create_engine
 
+from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import confusion_matrix
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
+
 
 nltk.download('punkt')
 nltk.download('stopwords')
@@ -27,7 +29,7 @@ lemmatizer = WordNetLemmatizer()
 def load_data(database_filepath):
     engine = create_engine("sqlite:///%s" % database_filepath, execution_options={"sqlite_raw_colnames": True})
     df = pd.read_sql_table("Test1", engine)
-    return (df['message'],df[df.columns.difference(['message','genre','original','id'])],df[df.columns.difference(['message','genre','original','id'])].columns)
+    return df['message'],df[df.columns.difference(['message','genre','original','id'])],df[df.columns.difference(['message','genre','original','id'])].columns
 
 
 def tokenize(text):
@@ -40,11 +42,15 @@ def tokenize(text):
 
 
 def build_model():
+    # note can use pipeline get params to get the features to play with
     pipeline = Pipeline([
         ('vect',CountVectorizer(tokenizer=tokenize)),
         ('tfidf',TfidfTransformer()),
         ('clf',RandomForestClassifier())
     ])
+    
+       
+
     return pipeline
     
     
