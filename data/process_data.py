@@ -6,11 +6,42 @@ from sqlalchemy import create_engine
 
 
 def load_data(messages_filepath, categories_filepath):
-    pass
+    messages = pd.read_csv(messages_filepath)
+    categories = pd.read_csv(categories_filepath)
+    
+    df = messages.merge(categories, left_on='id',right_on='id')
+    
+    # create a dataframe of the 36 individual category columns
+    categories = categories['categories'].str.split(';', expand=True)
+    
+    # select the first row of the categories dataframe
+    row = categories.head(1)
 
+    # use this row to extract a list of new column names for categories.
+    # one way is to apply a lambda function that takes everything 
+    # up to the second to last character of each string with slicing
+    category_colnames = row.apply(lambda r : r.str.split('-')[0][0])
 
+    # rename the columns of `categories`
+    categories.columns = category_colnames
+    
+    for column in categories:
+        # set each value to be the last character of the string
+        categories[column] = categories[column].apply(lambda c : c.split('-')[1])
+
+        # convert column from string to numeric
+        categories[column] = categories[column].astype('str')
+    
+    # drop the original categories column from `df`
+    df = df.drop('categories', axis=1)
+    
+    # concatenate the original dataframe with the new `categories` dataframe
+    df = pd.concat([df,categories], axis=1)
+    
+    return df
+    
 def clean_data(df):
-    pass
+    
 
 
 def save_data(df, database_filename):
