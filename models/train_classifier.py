@@ -7,8 +7,9 @@ stop_words = stopwords.words("english")
 lemmatizer = WordNetLemmatizer()
 
 def load_data(database_filepath):
-    
-    pass
+    engine = create_engine("sqlite:///%s" % "Test1.db", execution_options={"sqlite_raw_colnames": True})
+    df = pd.read_sql_table("Test1", engine)
+    return df
 
 
 def tokenize(text):
