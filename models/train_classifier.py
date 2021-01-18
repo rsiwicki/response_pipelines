@@ -1,9 +1,24 @@
 import sys
 
-from nltk.tokenize import word_tokenise
+# import libraries
+import re
+import nltk
+import pandas as pd
+from sqlalchemy import create_engine
 from nltk.stem.wordnet import WordNetLemmatizer
-from nltk.pipeline import Pipeline
-from nltk.metrics import confusion_matrix
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+from sqlalchemy import create_engine
+
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import confusion_matrix
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn.ensemble import RandomForestClassifier
+
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('wordnet')
 
 stop_words = stopwords.words("english")
 lemmatizer = WordNetLemmatizer()
