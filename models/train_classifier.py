@@ -27,7 +27,7 @@ lemmatizer = WordNetLemmatizer()
 def load_data(database_filepath):
     engine = create_engine("sqlite:///%s" % database_filepath, execution_options={"sqlite_raw_colnames": True})
     df = pd.read_sql_table("Test1", engine)
-    return (df['message'],df[df.columns.difference(['message'])],df[df.columns.difference(['message'])].columns)
+    return (df['message'],df[df.columns.difference(['message','genre','original','id'])],df[df.columns.difference(['message','genre','original','id'])].columns)
 
 
 def tokenize(text):
