@@ -2,14 +2,16 @@ import sys
 
 from nltk.tokenize import word_tokenise
 from nltk.stem.wordnet import WordNetLemmatizer
+from nltk.pipeline import Pipeline
+from nltk.metrics import confusion_matrix
 
 stop_words = stopwords.words("english")
 lemmatizer = WordNetLemmatizer()
 
 def load_data(database_filepath):
     engine = create_engine("sqlite:///%s" % database_filepath, execution_options={"sqlite_raw_colnames": True})
-    df = pd.read_sql_table("messages", engine)
-    return df
+    df = pd.read_sql_table("Test1", engine)
+    return (df['message'],df[df.columns.difference(['message'])],df[df.columns.difference(['message'])].columns)
 
 
 def tokenize(text):
@@ -22,8 +24,14 @@ def tokenize(text):
 
 
 def build_model():
-    pass
-
+    pipeline = Pipeline([
+        ('vect',CountVectorizer(tokenizer=tokenize)),
+        ('tfidf',TfidfTransformer()),
+        ('clf',RandomForestClassifier())
+    ])
+    return pipeline
+    
+    
 
 def evaluate_model(model, X_test, Y_test, category_names):
     pass

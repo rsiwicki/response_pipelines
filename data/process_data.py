@@ -43,6 +43,7 @@ def load_data(messages_filepath, categories_filepath):
 def clean_data(df):
     # drop duplicates
     df= df.drop_duplicates(subset=["message"],keep="first")
+    df = df.dropna()
     return df
 
 def save_data(df, database_filename):
