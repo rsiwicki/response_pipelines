@@ -49,9 +49,14 @@ def build_model():
         ('clf',RandomForestClassifier())
     ])
     
-       
+    parameters = {
+    'features__text_pipeline_vect_ngram_range' : ((1,1),(1,2)),
+    'clf__n_estimators' : [50, 100,200]
+    }   
 
-    return pipeline
+    cv = GridSearchCV(pipeline, param_grid=parameters)
+    
+    return cv
     
     
 
