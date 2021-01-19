@@ -1,22 +1,27 @@
-import sys
-
-# import libraries
 import re
 import nltk
+import sys
 import pandas as pd
 from sqlalchemy import create_engine
 from nltk.stem.wordnet import WordNetLemmatizer
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from sqlalchemy import create_engine
+import numpy
+import pickle
 
-from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import confusion_matrix
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.model_selection import train_test_split
+from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import accuracy_score
+from sklearn import metrics
+
+
 
 
 nltk.download('punkt')
@@ -28,7 +33,7 @@ lemmatizer = WordNetLemmatizer()
 
 def load_data(database_filepath):
     engine = create_engine("sqlite:///%s" % database_filepath, execution_options={"sqlite_raw_colnames": True})
-    df = pd.read_sql_table("Test1", engine)
+    df = pd.read_sql_table("messages", engine)
     return df['message'],df[df.columns.difference(['message','genre','original','id'])],df[df.columns.difference(['message','genre','original','id'])].columns
 
 
@@ -49,23 +54,33 @@ def build_model():
         ('clf',RandomForestClassifier())
     ])
     
-    parameters = {
-    'features__text_pipeline_vect_ngram_range' : ((1,1),(1,2)),
-    'clf__n_estimators' : [50, 100,200]
-    }   
+    # looks like the parameters are prefixed with the pipeline name :-)
+    param_grid = { 
+        #'clf__n_estimators': [200, 500],
+        #'clf__max_features': ['auto', 'sqrt', 'log2'],
+        #'clf__max_depth' : [4,5,6,7,8],
+        'clf__criterion' :['gini', 'entropy']
+    }
 
-    cv = GridSearchCV(pipeline, param_grid=parameters)
+    cv = GridSearchCV(pipeline, param_grid=param_grid)
     
     return cv
     
     
 
 def evaluate_model(model, X_test, Y_test, category_names):
-    pass
+    y_pred = model.predict(X_test)
+    labels = numpy.unique(y_pred)
+    print("Confusion Matrix:\n", confusion_matrix(Y_test,y_pred,labels=labels))
+    print("Accuracy = ",metrics.accuracy_score(Y_test, y_pred)*100)
+    print("F1 = ", metrics.f1_score(Y_test, y_pred)*100)
+    print("Recall = ", metrics.recall_score(Y_test, y_pred)*100)
+    print("Precision = ", metrics.precision_score(Y_test, y_pred)*100)
+    print("Best Params:\n", model.best_params_)
 
 
 def save_model(model, model_filepath):
-    pass
+    pickle.dump(model,open(model_filepath,"wb"))
 
 
 def main():
@@ -79,7 +94,7 @@ def main():
         model = build_model()
         
         print('Training model...')
-        model.fit(X_train, Y_train)
+        model.fit(X_train, Y_train.values.ravel())
         
         print('Evaluating model...')
         evaluate_model(model, X_test, Y_test, category_names)

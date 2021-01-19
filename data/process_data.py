@@ -32,18 +32,22 @@ def load_data(messages_filepath, categories_filepath):
         # convert column from string to numeric
         categories[column] = categories[column].astype('int')
     
+    categories = categories['related'].replace(2,1)
     # drop the original categories column from `df`
     df = df.drop('categories', axis=1)
     
     # concatenate the original dataframe with the new `categories` dataframe
     df = pd.concat([df,categories], axis=1)
-    
+    print(df.columns)
     return df
     
 def clean_data(df):
     # drop duplicates
     df= df.drop_duplicates(subset=["message"],keep="first")
     df = df.dropna()
+    #convert the relation 2 values to 1 or they are not binary
+    print(df.columns)
+    print(df.count)
     return df
 
 def save_data(df, database_filename):

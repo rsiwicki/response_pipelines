@@ -26,22 +26,24 @@ def tokenize(text):
     return clean_tokens
 
 # load data
-engine = create_engine('sqlite:///../data/YourDatabaseName.db')
-df = pd.read_sql_table('YourTableName', engine)
+engine = create_engine('sqlite:///../data/DisasterResponse7.db')
+df = pd.read_sql_table('messages', engine)
 
 # load model
-model = joblib.load("../models/your_model_name.pkl")
-
+model = joblib.load("../models/classifier6.pkl")
+print('model loaded')
 
 # index webpage displays cool visuals and receives user input text for model
 @app.route('/')
 @app.route('/index')
 def index():
     
+    print('console called')
     # extract data needed for visuals
     # TODO: Below is an example - modify to extract data for your own visuals
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
+    
     
     # create visuals
     # TODO: Below is an example - modify to create your own visuals
@@ -77,6 +79,7 @@ def index():
 # web page that handles user query and displays model results
 @app.route('/go')
 def go():
+    print('go called')
     # save user input in query
     query = request.args.get('query', '') 
 
