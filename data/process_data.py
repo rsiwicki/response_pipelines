@@ -1,3 +1,9 @@
+"""ETL pipeline for extracting, transforming / cleaning and loading messages.
+
+   The pipeline outputs a named sqlite database for down stream processing.
+"""
+
+
 import sys
 
 # import libraries
@@ -6,6 +12,18 @@ from sqlalchemy import create_engine
 
 
 def load_data(messages_filepath, categories_filepath):
+    """Loads the data from supplied csv files and performs some pre-prep on the unmerged data
+    files
+
+    Args:
+        messages_filepath: location of the messasges .csv file.
+        categories_filepath: location of the categories .csv file.
+
+    Returns:
+        DataFrame: extracted and prepared data. 
+
+    """
+    
     messages = pd.read_csv(messages_filepath)
     categories = pd.read_csv(categories_filepath)
     
@@ -32,25 +50,47 @@ def load_data(messages_filepath, categories_filepath):
         # convert column from string to numeric
         categories[column] = categories[column].astype('int')
     
-    categories = categories['related'].replace(2,1)
+    # non binary dirty related fields cause model to fail during training
+    #categories['related'] = categories['related'].replace(2,1)
+    # drop categories they skew model data
+    categories = categories.drop(columns=['related'])
+
+    # drop the original column
+    df = df.drop('original', axis=1)
     # drop the original categories column from `df`
     df = df.drop('categories', axis=1)
     
     # concatenate the original dataframe with the new `categories` dataframe
-    df = pd.concat([df,categories], axis=1)
+    df = pd.concat([df,categories], axis=1,join='inner')
     print(df.columns)
     return df
     
 def clean_data(df):
+    """ Template method for additional cleanind data steps.
+
+    Args: 
+        df: dataframe to clean.
+
+    Returns:
+        DataFrame: cleaned dataframe.
+
+    """
     # drop duplicates
     df= df.drop_duplicates(subset=["message"],keep="first")
     df = df.dropna()
-    #convert the relation 2 values to 1 or they are not binary
     print(df.columns)
     print(df.count)
     return df
 
 def save_data(df, database_filename):
+    """Saves / loads the processed data to a sqlite database
+
+    Args:
+        df: dataframe to save.
+        database_filename: location to save the sqlite.
+
+    """
+
     engine = create_engine('sqlite:///' + database_filename)
     df.to_sql('messages', engine, index=False)
 

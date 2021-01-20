@@ -8,7 +8,8 @@ from nltk.tokenize import word_tokenize
 from flask import Flask
 from flask import render_template, request, jsonify
 from plotly.graph_objs import Bar
-from sklearn.externals import joblib
+#from sklearn.externals import joblib
+import joblib
 from sqlalchemy import create_engine
 
 
@@ -26,11 +27,11 @@ def tokenize(text):
     return clean_tokens
 
 # load data
-engine = create_engine('sqlite:///../data/DisasterResponse7.db')
+engine = create_engine('sqlite:///../data/DisasterResponse_4.db')
 df = pd.read_sql_table('messages', engine)
 
 # load model
-model = joblib.load("../models/classifier6.pkl")
+model = joblib.load("../models/classifier_4.pkl")
 print('model loaded')
 
 # index webpage displays cool visuals and receives user input text for model
@@ -41,25 +42,46 @@ def index():
     print('console called')
     # extract data needed for visuals
     # TODO: Below is an example - modify to extract data for your own visuals
-    genre_counts = df.groupby('genre').count()['message']
-    genre_names = list(genre_counts.index)
+   
+    calc1_df = df.copy()
+    calc1_df['message_len'] = calc1_df['message'].str.len()
+    message_len_means = calc1_df['message_len'].groupby(calc1_df['genre']).mean()
+    message_len_max = calc1_df['message_len'].groupby(calc1_df['genre']).max()
+    genre_names = list(message_len_means.index)
     
     
     # create visuals
-    # TODO: Below is an example - modify to create your own visuals
     graphs = [
         {
             'data': [
                 Bar(
                     x=genre_names,
-                    y=genre_counts
+                    y=message_len_means
                 )
             ],
 
             'layout': {
-                'title': 'Distribution of Message Genres',
+                'title': 'Mean Message Length By Genre',
                 'yaxis': {
-                    'title': "Count"
+                    'title': "Mean Message Length"
+                },
+                'xaxis': {
+                    'title': "Genre"
+                }
+            }
+        },
+        {
+            'data': [
+                Bar(
+                    x=genre_names,
+                    y=message_len_max
+                )
+            ],
+
+            'layout': {
+                'title': 'Max Message Length By Genre',
+                'yaxis': {
+                    'title': "Max Message Length"
                 },
                 'xaxis': {
                     'title': "Genre"
